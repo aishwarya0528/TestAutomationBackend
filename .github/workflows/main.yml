@@ -24,14 +24,20 @@ jobs:
 
     - name: Build Backend with Maven
       run: |
+        cd backend
         mvn clean install
 
-    - name: Run Backend Tests
+    # Run specific tests in the root directory
+    - name: Run tests in the root directory
       run: |
-        mvn test
+        # Run specific test classes in the root directory
+        mvn -Dtest=LoginServletTest test
 
-    - name: Display LoginServletTest.java content
+    # Display the content of LoginServletTest.java test results
+    - name: Display test results
       run: |
-        cat LoginServletTest.java
-
-
+        if [ -f target/surefire-reports/TEST-LoginServletTest.xml ]; then
+          cat target/surefire-reports/TEST-LoginServletTest.xml
+        else
+          echo "Test result file not found."
+        fi
