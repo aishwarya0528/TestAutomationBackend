@@ -27,17 +27,11 @@ jobs:
         cd backend
         mvn clean install
 
-    # Run specific tests in the root directory
-    - name: Run tests in the root directory
+    - name: Run Backend Tests
       run: |
-        # Run specific test classes in the root directory
-        mvn -Dtest=LoginServletTest test
+        cd backend
+        mvn test
 
-    # Display the content of LoginServletTest.java test results
-    - name: Display test results
+    - name: Display LoginServletTest.java content
       run: |
-        if [ -f target/surefire-reports/TEST-LoginServletTest.xml ]; then
-          cat target/surefire-reports/TEST-LoginServletTest.xml
-        else
-          echo "Test result file not found."
-        fi
+        cat LoginServletTest.java
