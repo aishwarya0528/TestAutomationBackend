@@ -34,7 +34,6 @@ jobs:
 
     - name: Display LoginServletTest.java content
       run: |
-        cd backend
         cat LoginServletTest.java
 
 
