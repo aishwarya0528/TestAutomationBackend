@@ -24,12 +24,10 @@ jobs:
 
     - name: Build Backend with Maven
       run: |
-        cd backend
         mvn clean install
 
     - name: Run Backend Tests
       run: |
-        cd backend
         mvn test
 
     - name: Display LoginServletTest.java content
