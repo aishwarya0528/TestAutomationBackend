@@ -1,127 +1,145 @@
+Here's the JUnit test code for the LoginServlet class:
+
+```java
 import org.junit.Before;
 import org.junit.Test;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class LoginServletTest {
 
-    private LoginServlet loginServlet;
+    @Mock
     private HttpServletRequest request;
+
+    @Mock
     private HttpServletResponse response;
+
+    private LoginServlet servlet;
     private StringWriter stringWriter;
     private PrintWriter writer;
 
     @Before
-    public void setup() throws Exception {
-        // Initialize the servlet
-        loginServlet = new LoginServlet();
-        
-        // Mock the request and response objects
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
-
-        // Mock the PrintWriter to capture the response output
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        servlet = new LoginServlet();
         stringWriter = new StringWriter();
         writer = new PrintWriter(stringWriter);
-        
-        // Configure the mock response to return the mocked PrintWriter
         when(response.getWriter()).thenReturn(writer);
     }
 
     @Test
     public void testSuccessfulLogin() throws Exception {
-        // Simulate request parameters for a successful login
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
 
-        // Call the servlet method
-        loginServlet.doPost(request, response);
+        servlet.doPost(request, response);
 
-        // Verify that the content type was set to "text/html"
-        verify(response).setContentType("text/html");
-
-        // Verify that the status code was set to 200 OK
         verify(response).setStatus(HttpServletResponse.SC_OK);
-
-        // Capture and check the output
-        String result = stringWriter.toString();
-        assertTrue(result.contains("Login Successful!"));
+        assertTrue(stringWriter.toString().contains("Login Successful!"));
     }
 
     @Test
-    public void testFailedLogin() throws Exception {
-        // Simulate request parameters for a failed login
+    public void testFailedLoginIncorrectPassword() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
 
-        // Call the servlet method
-        loginServlet.doPost(request, response);
+        servlet.doPost(request, response);
 
-        // Verify that the content type was set to "text/html"
-        verify(response).setContentType("text/html");
-
-        // Verify that the status code was set to 401 Unauthorized
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-        // Capture and check the output
-        String result = stringWriter.toString();
-        assertTrue(result.contains("Login Failed"));
+        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 
     @Test
-    public void testNullUsername() throws Exception {
-        // Simulate a null username
-        when(request.getParameter("username")).thenReturn(null);
+    public void testFailedLoginIncorrectUsername() throws Exception {
+        when(request.getParameter("username")).thenReturn("wronguser");
         when(request.getParameter("password")).thenReturn("password123");
 
-        // Call the servlet method
-        loginServlet.doPost(request, response);
+        servlet.doPost(request, response);
 
-        // Verify the response for unauthorized status due to null username
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 
     @Test
-    public void testNullPassword() throws Exception {
-        // Simulate a null password
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn(null);
-
-        // Call the servlet method
-        loginServlet.doPost(request, response);
-
-        // Verify the response for unauthorized status due to null password
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    }
-
-    @Test
-    public void testEmptyUsername() throws Exception {
-        // Simulate an empty username
+    public void testEmptyCredentials() throws Exception {
         when(request.getParameter("username")).thenReturn("");
-        when(request.getParameter("password")).thenReturn("password123");
-
-        // Call the servlet method
-        loginServlet.doPost(request, response);
-
-        // Verify the response for unauthorized status due to empty username
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    }
-
-    @Test
-    public void testEmptyPassword() throws Exception {
-        // Simulate an empty password
-        when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("");
 
-        // Call the servlet method
-        loginServlet.doPost(request, response);
+        servlet.doPost(request, response);
 
-        // Verify the response for unauthorized status due to empty password
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+    }
+
+    @Test
+    public void testSqlInjectionAttempt() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin' --");
+        when(request.getParameter("password")).thenReturn("anypassword");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+    }
+
+    @Test
+    public void testXssAttackPrevention() throws Exception {
+        when(request.getParameter("username")).thenReturn("<script>alert('XSS')</script>");
+        when(request.getParameter("password")).thenReturn("password123");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+    }
+
+    @Test
+    public void testNullParameterHandling() throws Exception {
+        when(request.getParameter("username")).thenReturn(null);
+        when(request.getParameter("password")).thenReturn(null);
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+    }
+
+    @Test
+    public void testCaseSensitivity() throws Exception {
+        when(request.getParameter("username")).thenReturn("ADMIN");
+        when(request.getParameter("password")).thenReturn("PASSWORD123");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+    }
+
+    @Test
+    public void testWhitespaceHandling() throws Exception {
+        when(request.getParameter("username")).thenReturn(" admin ");
+        when(request.getParameter("password")).thenReturn(" password123 ");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+    }
+
+    @Test
+    public void testResponseContentType() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("password123");
+
+        servlet.doPost(request, response);
+
+        verify(response).setContentType("text/html");
     }
 }
+```
