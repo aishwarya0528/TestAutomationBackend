@@ -1,6 +1,4 @@
-Here's the JUnit test code for the LoginServlet class:
 
-```java
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -147,4 +145,3 @@ public class LoginServletTest {
         verify(response).setContentType("text/html");
     }
 }
-```
