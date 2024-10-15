@@ -1,6 +1,4 @@
-Here are the JUnit test cases for the LoginServlet class:
 
-```java
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -157,4 +155,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 }
-```
