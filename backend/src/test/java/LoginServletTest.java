@@ -1,6 +1,4 @@
-Here's the JUnit test code for the LoginServlet class:
 
-```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -216,4 +214,3 @@ public class LoginServletTest {
         verify(request).getSession(true);
     }
 }
-```
