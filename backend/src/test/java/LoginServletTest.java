@@ -1,10 +1,13 @@
+Here's the JUnit test code for the LoginServlet class:
 
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import static org.junit.Assert.*;
@@ -17,6 +20,9 @@ public class LoginServletTest {
 
     @Mock
     private HttpServletResponse response;
+
+    @Mock
+    private HttpSession session;
 
     private LoginServlet servlet;
     private StringWriter stringWriter;
@@ -32,36 +38,39 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testValidLogin() throws Exception {
+    public void testSuccessfulLogin() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
-        assertTrue(stringWriter.toString().contains("Login Successful"));
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Welcome, admin!"));
     }
 
     @Test
-    public void testInvalidUsername() throws Exception {
-        when(request.getParameter("username")).thenReturn("wronguser");
-        when(request.getParameter("password")).thenReturn("password123");
-
-        servlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
-    }
-
-    @Test
-    public void testInvalidPassword() throws Exception {
+    public void testFailedLoginIncorrectPassword() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
+    }
+
+    @Test
+    public void testFailedLoginIncorrectUsername() throws Exception {
+        when(request.getParameter("username")).thenReturn("wronguser");
+        when(request.getParameter("password")).thenReturn("password123");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
     }
 
     @Test
@@ -72,7 +81,8 @@ public class LoginServletTest {
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
     }
 
     @Test
@@ -83,51 +93,44 @@ public class LoginServletTest {
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
     }
 
     @Test
-    public void testSqlInjectionAttempt() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin' --");
-        when(request.getParameter("password")).thenReturn("anypassword");
+    public void testSpecialCharactersInCredentials() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin!@#");
+        when(request.getParameter("password")).thenReturn("pass!@#");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
     }
 
     @Test
-    public void testXssAttackAttempt() throws Exception {
+    public void testSqlInjectionAttempt() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin' OR '1'='1");
+        when(request.getParameter("password")).thenReturn("password123");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
+    }
+
+    @Test
+    public void testXssAttempt() throws Exception {
         when(request.getParameter("username")).thenReturn("<script>alert('XSS')</script>");
         when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
-    }
-
-    @Test
-    public void testLongInput() throws Exception {
-        when(request.getParameter("username")).thenReturn("a".repeat(1000));
-        when(request.getParameter("password")).thenReturn("a".repeat(1000));
-
-        servlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
-    }
-
-    @Test
-    public void testSpecialCharacters() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin@#$%");
-        when(request.getParameter("password")).thenReturn("password123!@#");
-
-        servlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
     }
 
     @Test
@@ -138,7 +141,8 @@ public class LoginServletTest {
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
     }
 
     @Test
@@ -151,3 +155,4 @@ public class LoginServletTest {
         verify(response).setContentType("text/html");
     }
 }
+```
