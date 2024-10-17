@@ -32,6 +32,6 @@ jobs:
         cd backend
         mvn test
 
-    - name: Display LoginServletTest.java content
+    - name: Display backend/src/test/java/LoginServletTest.java content
       run: |
         cat LoginServletTest.java
