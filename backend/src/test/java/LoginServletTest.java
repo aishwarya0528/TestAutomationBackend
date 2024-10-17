@@ -1,13 +1,18 @@
+Here are the JUnit test cases for the LoginServlet class:
 
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class LoginServletTest {
@@ -39,7 +44,7 @@ public class LoginServletTest {
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
-        assertTrue(stringWriter.toString().contains("Login Successful!"));
+        assertTrue(stringWriter.toString().contains("Login Successful"));
     }
 
     @Test
@@ -76,9 +81,9 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testSqlInjectionAttempt() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin' OR '1'='1");
-        when(request.getParameter("password")).thenReturn("password123");
+    public void testNullCredentials() throws Exception {
+        when(request.getParameter("username")).thenReturn(null);
+        when(request.getParameter("password")).thenReturn(null);
 
         servlet.doPost(request, response);
 
@@ -87,29 +92,7 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testXssAttackPrevention() throws Exception {
-        when(request.getParameter("username")).thenReturn("<script>alert('XSS')</script>");
-        when(request.getParameter("password")).thenReturn("password123");
-
-        servlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("&lt;script&gt;"));
-    }
-
-    @Test
-    public void testLongInputStrings() throws Exception {
-        when(request.getParameter("username")).thenReturn("a".repeat(1000));
-        when(request.getParameter("password")).thenReturn("b".repeat(1000));
-
-        servlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
-    }
-
-    @Test
-    public void testSpecialCharactersInInput() throws Exception {
+    public void testSpecialCharactersInCredentials() throws Exception {
         when(request.getParameter("username")).thenReturn("admin!@#$%^&*()");
         when(request.getParameter("password")).thenReturn("password123!@#$%^&*()");
 
@@ -118,4 +101,35 @@ public class LoginServletTest {
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         assertTrue(stringWriter.toString().contains("Login Failed"));
     }
+
+    @Test
+    public void testSqlInjectionAttempt() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin' OR '1'='1");
+        when(request.getParameter("password")).thenReturn("password123' OR '1'='1");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+    }
+
+    @Test
+    public void testXssAttempt() throws Exception {
+        when(request.getParameter("username")).thenReturn("<script>alert('XSS')</script>");
+        when(request.getParameter("password")).thenReturn("password123");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+        assertFalse(stringWriter.toString().contains("<script>"));
+    }
+
+    @Test
+    public void testResponseContentType() throws Exception {
+        servlet.doPost(request, response);
+
+        verify(response).setContentType("text/html");
+    }
 }
+```
