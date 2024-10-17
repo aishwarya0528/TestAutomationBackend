@@ -32,6 +32,6 @@ jobs:
         cd backend
         mvn test
 
-    - name: Display backend/src/test/java/LoginServletTest.java content
+    - name: Display https://github.com/aishwarya0528/TestAutomationBackend/blob/main/backend/src/test/java/LoginServletTest.java content
       run: |
         cat LoginServletTest.java
