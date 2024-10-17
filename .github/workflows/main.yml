@@ -7,31 +7,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the code from the repository
-    - uses: actions/checkout@v4
+      # Checkout the code from the repository
+      - uses: actions/checkout@v4
 
-    # ------------------------
-    # Backend (Java) Testing
-    # ------------------------
-    - name: Set up Java
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'  # Use the Temurin distribution of OpenJDK
-        java-version: '17'       # Set the Java version (you can use a different version if needed)
+      # ------------------------
+      # Backend (Java) Testing
+      # ------------------------
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'  # Use the Temurin distribution of OpenJDK
+          java-version: '17'       # Set the Java version (you can use a different version if needed)
 
-    - name: Install Maven
-      run: sudo apt-get install maven -y
+      - name: Install Maven
+        run: sudo apt-get install maven -y
 
-    - name: Build Backend with Maven
-      run: |
-        cd backend
-        mvn clean install
+      - name: Build Backend with Maven
+        run: |
+          cd backend
+          mvn clean install
 
-    - name: Run Backend Tests
-      run: |
-        cd backend
-        mvn test
+      - name: Run Backend Tests
+        run: |
+          cd backend
+          mvn test
 
-    - name: Display https://github.com/aishwarya0528/TestAutomationBackend/blob/main/backend/src/test/java/LoginServletTest.java content
-      run: |
-        cat LoginServletTest.java
+      - name: Display Backend Test File
+        run: |
+          cat backend/src/test/java/LoginServletTest.java
