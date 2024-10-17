@@ -1,4 +1,6 @@
+Here are the JUnit test cases for the LoginServlet class:
 
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -39,13 +41,13 @@ public class LoginServletTest {
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
-        assertTrue(stringWriter.toString().contains("Login Successful"));
+        assertTrue(stringWriter.toString().contains("Login Successful!"));
     }
 
     @Test
-    public void testFailedLoginInvalidUsername() throws Exception {
-        when(request.getParameter("username")).thenReturn("invaliduser");
-        when(request.getParameter("password")).thenReturn("password123");
+    public void testFailedLoginIncorrectPassword() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("wrongpassword");
 
         servlet.doPost(request, response);
 
@@ -54,9 +56,9 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testFailedLoginInvalidPassword() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
+    public void testFailedLoginIncorrectUsername() throws Exception {
+        when(request.getParameter("username")).thenReturn("wronguser");
+        when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
@@ -77,7 +79,7 @@ public class LoginServletTest {
 
     @Test
     public void testSqlInjectionAttempt() throws Exception {
-        when(request.getParameter("username")).thenReturn("' OR '1'='1");
+        when(request.getParameter("username")).thenReturn("admin' OR '1'='1");
         when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
@@ -87,18 +89,18 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testXssAttempt() throws Exception {
+    public void testXssAttackPrevention() throws Exception {
         when(request.getParameter("username")).thenReturn("<script>alert('XSS')</script>");
         when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        assertTrue(stringWriter.toString().contains("&lt;script&gt;"));
     }
 
     @Test
-    public void testLongInput() throws Exception {
+    public void testLongInputStrings() throws Exception {
         when(request.getParameter("username")).thenReturn("a".repeat(1000));
         when(request.getParameter("password")).thenReturn("b".repeat(1000));
 
@@ -109,9 +111,9 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testSpecialCharacters() throws Exception {
-        when(request.getParameter("username")).thenReturn("user@#$%^&*");
-        when(request.getParameter("password")).thenReturn("pass@#$%^&*");
+    public void testSpecialCharactersInInput() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin!@#$%^&*()");
+        when(request.getParameter("password")).thenReturn("password123!@#$%^&*()");
 
         servlet.doPost(request, response);
 
@@ -119,3 +121,4 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 }
+```
