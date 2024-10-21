@@ -1,6 +1,4 @@
-Here are the JUnit test cases for the LoginServlet class:
 
-```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -100,4 +98,3 @@ public class LoginServletTest {
         assertFalse(stringWriter.toString().contains(xssPayload));
     }
 }
-```
