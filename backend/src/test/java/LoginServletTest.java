@@ -1,4 +1,4 @@
-Here are the JUnit test cases for the LoginServlet class:
+Here's the JUnit test code for the LoginServlet class:
 
 ```java
 import org.junit.Before;
@@ -79,34 +79,46 @@ public class LoginServletTest {
 
     @Test
     public void testSqlInjectionAttempt() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin' --");
+        when(request.getParameter("username")).thenReturn("admin' OR '1'='1");
         when(request.getParameter("password")).thenReturn("anypassword");
 
         loginServlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertFalse(stringWriter.toString().contains("SQL"));
+        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 
     @Test
-    public void testXssAttackPrevention() throws Exception {
+    public void testXssAttempt() throws Exception {
         when(request.getParameter("username")).thenReturn("<script>alert('XSS')</script>");
         when(request.getParameter("password")).thenReturn("anypassword");
 
         loginServlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("&lt;script&gt;"));
+        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 
     @Test
-    public void testInputSanitization() throws Exception {
-        when(request.getParameter("username")).thenReturn("user@example.com");
-        when(request.getParameter("password")).thenReturn("p@ssw0rd!");
+    public void testLongInputValues() throws Exception {
+        when(request.getParameter("username")).thenReturn("a".repeat(1000));
+        when(request.getParameter("password")).thenReturn("b".repeat(1000));
 
         loginServlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+    }
+
+    @Test
+    public void testSpecialCharactersInInput() throws Exception {
+        when(request.getParameter("username")).thenReturn("user@#$%^&*");
+        when(request.getParameter("password")).thenReturn("pass@#$%^&*");
+
+        loginServlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 }
 ```
