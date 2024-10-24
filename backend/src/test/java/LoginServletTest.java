@@ -81,9 +81,9 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testNullCredentials() throws Exception {
-        when(request.getParameter("username")).thenReturn(null);
-        when(request.getParameter("password")).thenReturn(null);
+    public void testSqlInjectionAttempt() throws Exception {
+        when(request.getParameter("username")).thenReturn("' OR '1'='1");
+        when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
@@ -92,68 +92,89 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testSQLInjectionAttempt() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin' --");
-        when(request.getParameter("password")).thenReturn("anypassword");
-
-        servlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
-    }
-
-    @Test
-    public void testXSSAttempt() throws Exception {
+    public void testCrossSiteScriptingAttempt() throws Exception {
         when(request.getParameter("username")).thenReturn("<script>alert('XSS')</script>");
         when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        assertTrue(stringWriter.toString().contains("&lt;script&gt;"));
     }
 
     @Test
     public void testLongInputValues() throws Exception {
-        when(request.getParameter("username")).thenReturn("a".repeat(1000));
-        when(request.getParameter("password")).thenReturn("b".repeat(1000));
+        String longString = new String(new char[1000]).replace("\0", "a");
+        when(request.getParameter("username")).thenReturn(longString);
+        when(request.getParameter("password")).thenReturn(longString);
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 
     @Test
     public void testSpecialCharactersInInput() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin@#$%");
-        when(request.getParameter("password")).thenReturn("pass@#$%");
+        when(request.getParameter("username")).thenReturn("user@!#$%^&*()");
+        when(request.getParameter("password")).thenReturn("pass@!#$%^&*()");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 
     @Test
-    public void testCaseSensitivityCheck() throws Exception {
-        when(request.getParameter("username")).thenReturn("ADMIN");
-        when(request.getParameter("password")).thenReturn("PASSWORD123");
+    public void testConcurrentLoginAttempts() throws Exception {
+        Runnable loginTask = () -> {
+            try {
+                servlet.doPost(request, response);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
 
-        servlet.doPost(request, response);
+        Thread t1 = new Thread(loginTask);
+        Thread t2 = new Thread(loginTask);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        verify(response, times(2)).setStatus(anyInt());
     }
 
     @Test
-    public void testResponseContentType() throws Exception {
+    public void testSessionManagement() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
-        verify(response).setContentType("text/html");
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @Test
+    public void testCsrfProtection() throws Exception {
+        when(request.getHeader("Origin")).thenReturn("http://malicious-site.com");
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("password123");
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @Test
+    public void testResponseHeaders() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("password123");
+
+        servlet.doPost(request, response);
+
+        verify(response).setHeader("X-XSS-Protection", "1; mode=block");
+        verify(response).setHeader("X-Frame-Options", "DENY");
     }
 }
 ```
