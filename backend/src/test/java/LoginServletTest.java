@@ -1,6 +1,4 @@
-Here's the JUnit test code for the LoginServlet class:
 
-```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -174,4 +172,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("<a href=\"login.html\">Go Back to Login</a>"));
     }
 }
-```
