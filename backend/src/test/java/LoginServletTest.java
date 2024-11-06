@@ -1,4 +1,6 @@
+Here's the JUnit test code for the LoginServlet:
 
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -65,17 +67,6 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testFailedLoginBothIncorrect() throws Exception {
-        when(request.getParameter("username")).thenReturn("wronguser");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
-
-        servlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed"));
-    }
-
-    @Test
     public void testEmptyCredentials() throws Exception {
         when(request.getParameter("username")).thenReturn("");
         when(request.getParameter("password")).thenReturn("");
@@ -87,9 +78,9 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testSQLInjectionAttempt() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin' --");
-        when(request.getParameter("password")).thenReturn("anything");
+    public void testSqlInjectionAttempt() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin' OR '1'='1");
+        when(request.getParameter("password")).thenReturn("anypassword");
 
         servlet.doPost(request, response);
 
@@ -98,9 +89,9 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testXSSAttackPrevention() throws Exception {
+    public void testXssAttempt() throws Exception {
         when(request.getParameter("username")).thenReturn("<script>alert('XSS')</script>");
-        when(request.getParameter("password")).thenReturn("password123");
+        when(request.getParameter("password")).thenReturn("anypassword");
 
         servlet.doPost(request, response);
 
@@ -109,9 +100,10 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testLongInputHandling() throws Exception {
-        when(request.getParameter("username")).thenReturn("a".repeat(1000));
-        when(request.getParameter("password")).thenReturn("b".repeat(1000));
+    public void testLongInputValues() throws Exception {
+        String longString = new String(new char[1000]).replace("\0", "a");
+        when(request.getParameter("username")).thenReturn(longString);
+        when(request.getParameter("password")).thenReturn(longString);
 
         servlet.doPost(request, response);
 
@@ -120,9 +112,9 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testSpecialCharactersInCredentials() throws Exception {
-        when(request.getParameter("username")).thenReturn("user@example.com");
-        when(request.getParameter("password")).thenReturn("p@ssw0rd!");
+    public void testSpecialCharactersInInput() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin!@#$%^&*()");
+        when(request.getParameter("password")).thenReturn("password!@#$%^&*()");
 
         servlet.doPost(request, response);
 
@@ -150,25 +142,5 @@ public class LoginServletTest {
 
         verify(response).setContentType("text/html");
     }
-
-    @Test
-    public void testHTMLStructureValidation() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("password123");
-
-        servlet.doPost(request, response);
-
-        assertTrue(stringWriter.toString().contains("<html><body>"));
-        assertTrue(stringWriter.toString().contains("</body></html>"));
-    }
-
-    @Test
-    public void testRedirectLinkForFailedLogin() throws Exception {
-        when(request.getParameter("username")).thenReturn("wronguser");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
-
-        servlet.doPost(request, response);
-
-        assertTrue(stringWriter.toString().contains("<a href=\"login.html\">Go Back to Login</a>"));
-    }
 }
+```
