@@ -1,9 +1,16 @@
+Here are the JUnit test cases for the LoginServlet class:
+
+```java
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import javax.servlet.http.*;
-import java.io.*;
 
 public class LoginServletTest {
 
@@ -52,10 +59,12 @@ public class LoginServletTest {
     public void testMultipleFailedLoginAttempts() throws Exception {
         LoginServlet loginServlet = new LoginServlet();
         
+        // Simulate 5 failed login attempts
         for (int i = 0; i < 5; i++) {
             simulateFailedLoginAttempt(loginServlet);
         }
         
+        // 6th attempt should result in a lockout
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getParameter("username")).thenReturn("invaliduser");
         when(request.getParameter("password")).thenReturn("wrongpassword");
@@ -67,8 +76,9 @@ public class LoginServletTest {
 
         loginServlet.doPost(request, response);
 
+        // Verify the response
         verify(response).setContentType("text/html");
-        verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+        verify(response).setStatus(429); // 429 is the status code for Too Many Requests
         assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
     }
 
@@ -85,3 +95,4 @@ public class LoginServletTest {
         loginServlet.doPost(request, response);
     }
 }
+```
