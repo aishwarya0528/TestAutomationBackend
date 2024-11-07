@@ -1,6 +1,4 @@
-Here are the JUnit test cases for the LoginServlet class:
 
-```java
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -87,4 +85,3 @@ public class LoginServletTest {
         loginServlet.doPost(request, response);
     }
 }
-```
