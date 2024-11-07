@@ -1,6 +1,4 @@
-Here's the JUnit test code for the LoginServlet class:
 
-```java
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
@@ -71,4 +69,3 @@ public class LoginServletTest {
         assertTrue(writer.toString().contains("Invalid username or password. Try again."));
     }
 }
-```
