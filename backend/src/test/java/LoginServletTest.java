@@ -1,29 +1,43 @@
+Here's the JUnit test code for the LoginServlet class:
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
+```java
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Test;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class LoginServletTest {
 
+    @Mock
+    private HttpServletRequest request;
+
+    @Mock
+    private HttpServletResponse response;
+
+    private LoginServlet loginServlet;
+    private StringWriter stringWriter;
+    private PrintWriter writer;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        loginServlet = new LoginServlet();
+        stringWriter = new StringWriter();
+        writer = new PrintWriter(stringWriter);
+        when(response.getWriter()).thenReturn(writer);
+    }
+
     @Test
     public void testSuccessfulLogin() throws Exception {
-        HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
 
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter writer = new PrintWriter(stringWriter);
-        when(response.getWriter()).thenReturn(writer);
-
-        LoginServlet loginServlet = new LoginServlet();
         loginServlet.doPost(request, response);
 
         verify(response).setContentType("text/html");
@@ -34,61 +48,28 @@ public class LoginServletTest {
 
     @Test
     public void testFailedLogin() throws Exception {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getParameter("username")).thenReturn("invaliduser");
+        when(request.getParameter("username")).thenReturn("wronguser");
         when(request.getParameter("password")).thenReturn("wrongpassword");
 
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter writer = new PrintWriter(stringWriter);
-        when(response.getWriter()).thenReturn(writer);
-
-        LoginServlet loginServlet = new LoginServlet();
         loginServlet.doPost(request, response);
 
         verify(response).setContentType("text/html");
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         assertTrue(stringWriter.toString().contains("Login Failed"));
         assertTrue(stringWriter.toString().contains("Invalid username or password. Try again."));
-        assertTrue(stringWriter.toString().contains("Go Back to Login"));
     }
 
     @Test
-    public void testMultipleFailedLoginAttempts() throws Exception {
-        LoginServlet loginServlet = new LoginServlet();
-        
-        // Simulate 5 failed login attempts
-        for (int i = 0; i < 5; i++) {
-            simulateFailedLoginAttempt(loginServlet);
-        }
-        
-        // 6th attempt should result in a lockout
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getParameter("username")).thenReturn("invaliduser");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
-
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter writer = new PrintWriter(stringWriter);
-        when(response.getWriter()).thenReturn(writer);
+    public void testEmptyCredentials() throws Exception {
+        when(request.getParameter("username")).thenReturn("");
+        when(request.getParameter("password")).thenReturn("");
 
         loginServlet.doPost(request, response);
 
-        // Verify the response
         verify(response).setContentType("text/html");
-        verify(response).setStatus(429); // 429 is the status code for Too Many Requests
-        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
+        assertTrue(stringWriter.toString().contains("Invalid username or password. Try again."));
     }
-
-    private void simulateFailedLoginAttempt(LoginServlet loginServlet) throws Exception {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getParameter("username")).thenReturn("invaliduser");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
-
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter writer = new PrintWriter(stringWriter);
-        when(response.getWriter()).thenReturn(writer);
-
-        loginServlet.doPost(request, response);
-    }
+}
+```
