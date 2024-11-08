@@ -1,4 +1,3 @@
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -18,27 +17,28 @@ public class LoginServletTest {
     @Mock
     private HttpServletResponse response;
 
-    private LoginServlet servlet;
+    private LoginServlet loginServlet;
     private StringWriter stringWriter;
     private PrintWriter writer;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        servlet = new LoginServlet();
+        loginServlet = new LoginServlet();
         stringWriter = new StringWriter();
         writer = new PrintWriter(stringWriter);
-        when(response.getWriter()).thenReturn(writer);
     }
 
     @Test
     public void testSuccessfulLogin() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
+        when(response.getWriter()).thenReturn(writer);
 
-        servlet.doPost(request, response);
+        loginServlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
+        verify(response).setContentType("text/html");
         assertTrue(stringWriter.toString().contains("Login Successful!"));
         assertTrue(stringWriter.toString().contains("Welcome, admin!"));
     }
@@ -47,10 +47,12 @@ public class LoginServletTest {
     public void testFailedLoginInvalidUsername() throws Exception {
         when(request.getParameter("username")).thenReturn("invaliduser");
         when(request.getParameter("password")).thenReturn("password123");
+        when(response.getWriter()).thenReturn(writer);
 
-        servlet.doPost(request, response);
+        loginServlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setContentType("text/html");
         assertTrue(stringWriter.toString().contains("Login Failed"));
         assertTrue(stringWriter.toString().contains("Invalid username or password. Try again."));
         assertTrue(stringWriter.toString().contains("Go Back to Login"));
@@ -60,10 +62,12 @@ public class LoginServletTest {
     public void testFailedLoginInvalidPassword() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
+        when(response.getWriter()).thenReturn(writer);
 
-        servlet.doPost(request, response);
+        loginServlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setContentType("text/html");
         assertTrue(stringWriter.toString().contains("Login Failed"));
         assertTrue(stringWriter.toString().contains("Invalid username or password. Try again."));
         assertTrue(stringWriter.toString().contains("Go Back to Login"));
