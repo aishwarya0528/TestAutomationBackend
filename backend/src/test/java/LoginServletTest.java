@@ -1,6 +1,4 @@
-Here are the JUnit test cases based on the provided Java code and test case specifications:
 
-```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -89,4 +87,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Account temporarily locked"));
     }
 }
-```
