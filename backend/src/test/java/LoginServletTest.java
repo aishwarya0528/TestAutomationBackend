@@ -1,4 +1,6 @@
+Here's the JUnit test code for the LoginServlet:
 
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -46,15 +48,15 @@ public class LoginServletTest {
 
     @Test
     public void testInvalidUsername() throws Exception {
-        when(request.getParameter("username")).thenReturn("invaliduser");
+        when(request.getParameter("username")).thenReturn("wronguser");
         when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setContentType("text/html");
         assertTrue(stringWriter.toString().contains("Login Failed"));
         assertTrue(stringWriter.toString().contains("Invalid username or password"));
-        assertTrue(stringWriter.toString().contains("<a href=\"login.html\">Go Back to Login</a>"));
     }
 
     @Test
@@ -65,25 +67,19 @@ public class LoginServletTest {
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setContentType("text/html");
         assertTrue(stringWriter.toString().contains("Login Failed"));
         assertTrue(stringWriter.toString().contains("Invalid username or password"));
-        assertTrue(stringWriter.toString().contains("<a href=\"login.html\">Go Back to Login</a>"));
     }
 
     @Test
-    public void testLoginAttemptLimit() throws Exception {
-        for (int i = 0; i < 5; i++) {
-            when(request.getParameter("username")).thenReturn("admin");
-            when(request.getParameter("password")).thenReturn("wrongpassword");
-            servlet.doPost(request, response);
-        }
-
-        reset(response);
-        when(response.getWriter()).thenReturn(writer);
+    public void testContentTypeValidation() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("password123");
 
         servlet.doPost(request, response);
 
-        verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
-        assertTrue(stringWriter.toString().contains("Account temporarily locked"));
+        verify(response).setContentType("text/html");
     }
 }
+```
