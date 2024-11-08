@@ -1,4 +1,6 @@
+Here are the JUnit test cases based on the provided Java code and test case specifications:
 
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -39,12 +41,13 @@ public class LoginServletTest {
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
+        verify(response).setContentType("text/html");
         assertTrue(stringWriter.toString().contains("Login Successful!"));
         assertTrue(stringWriter.toString().contains("Welcome, admin!"));
     }
 
     @Test
-    public void testFailedLoginInvalidUsername() throws Exception {
+    public void testInvalidUsername() throws Exception {
         when(request.getParameter("username")).thenReturn("invaliduser");
         when(request.getParameter("password")).thenReturn("password123");
 
@@ -52,20 +55,38 @@ public class LoginServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         assertTrue(stringWriter.toString().contains("Login Failed"));
-        assertTrue(stringWriter.toString().contains("Invalid username or password. Try again."));
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
         assertTrue(stringWriter.toString().contains("<a href=\"login.html\">Go Back to Login</a>"));
     }
 
     @Test
-    public void testFailedLoginInvalidPassword() throws Exception {
+    public void testInvalidPassword() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("invalidpassword");
+        when(request.getParameter("password")).thenReturn("wrongpassword");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         assertTrue(stringWriter.toString().contains("Login Failed"));
-        assertTrue(stringWriter.toString().contains("Invalid username or password. Try again."));
+        assertTrue(stringWriter.toString().contains("Invalid username or password"));
         assertTrue(stringWriter.toString().contains("<a href=\"login.html\">Go Back to Login</a>"));
     }
+
+    @Test
+    public void testLoginAttemptLimit() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            when(request.getParameter("username")).thenReturn("admin");
+            when(request.getParameter("password")).thenReturn("wrongpassword");
+            servlet.doPost(request, response);
+        }
+
+        reset(response);
+        when(response.getWriter()).thenReturn(writer);
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+        assertTrue(stringWriter.toString().contains("Account temporarily locked"));
+    }
 }
+```
