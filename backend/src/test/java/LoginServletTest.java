@@ -1,6 +1,4 @@
-Here are the JUnit test cases based on the provided Java code and test cases:
 
-```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -95,4 +93,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Invalid username or password. Try again."));
     }
 }
-```
