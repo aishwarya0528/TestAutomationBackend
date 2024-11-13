@@ -1,11 +1,7 @@
-Based on the provided LoginServlet.java file, here are the JUnit test cases:
-
-```java
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -83,4 +79,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
     }
 }
-```
