@@ -1,11 +1,16 @@
+Here's the JUnit test code for the LoginServlet class:
+
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -102,3 +107,4 @@ public class LoginServletTest {
         assertFalse(stringWriter.toString().contains("password123"));
     }
 }
+```
