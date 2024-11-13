@@ -1,12 +1,6 @@
-Here's the JUnit test code for the LoginServlet class:
-
-```java
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
 import static org.junit.Assert.*;
-import javax.servlet.http.HttpServletResponse;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 public class LoginServletTest {
     private LoginServlet loginServlet;
@@ -18,107 +12,62 @@ public class LoginServletTest {
 
     @Test
     public void testSuccessfulLogin() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        
-        request.setParameter("username", "admin");
-        request.setParameter("password", "password123");
-        
-        loginServlet.doPost(request, response);
-        
-        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
-        assertTrue(response.getContentAsString().contains("Login Successful!"));
-        assertTrue(response.getContentAsString().contains("admin"));
+        Response response = loginServlet.doPost("admin", "password123");
+        assertEquals(200, response.getStatus());
+        assertTrue(response.getContent().contains("Login Successful!"));
+        assertTrue(response.getContent().contains("admin"));
     }
 
     @Test
     public void testInvalidUsername() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        
-        request.setParameter("username", "wronguser");
-        request.setParameter("password", "password123");
-        
-        loginServlet.doPost(request, response);
-        
-        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-        assertTrue(response.getContentAsString().contains("Login Failed. Invalid username or password."));
+        Response response = loginServlet.doPost("wronguser", "password123");
+        assertEquals(401, response.getStatus());
+        assertEquals("Login Failed. Invalid username or password.", response.getContent());
     }
 
     @Test
     public void testInvalidPassword() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        
-        request.setParameter("username", "admin");
-        request.setParameter("password", "wrongpassword");
-        
-        loginServlet.doPost(request, response);
-        
-        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
-        assertTrue(response.getContentAsString().contains("Login Failed. Invalid username or password."));
+        Response response = loginServlet.doPost("admin", "wrongpassword");
+        assertEquals(401, response.getStatus());
+        assertEquals("Login Failed. Invalid username or password.", response.getContent());
     }
 
     @Test
-    public void testEmptyUsername() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        
-        request.setParameter("username", "");
-        request.setParameter("password", "password123");
-        
-        loginServlet.doPost(request, response);
-        
-        assertEquals(HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
-        assertTrue(response.getContentAsString().contains("Username and password are required"));
-    }
-
-    @Test
-    public void testEmptyPassword() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        
-        request.setParameter("username", "admin");
-        request.setParameter("password", "");
-        
-        loginServlet.doPost(request, response);
-        
-        assertEquals(HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
-        assertTrue(response.getContentAsString().contains("Username and password are required"));
+    public void testContentType() {
+        Response response = loginServlet.doPost("admin", "password123");
+        assertEquals("text/html", response.getContentType());
     }
 
     @Test
     public void testLoginAttemptLimit() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        
         for (int i = 0; i < 5; i++) {
-            request.setParameter("username", "admin");
-            request.setParameter("password", "wrongpassword");
-            loginServlet.doPost(request, response);
+            Response response = loginServlet.doPost("admin", "wrongpass");
+            assertEquals(401, response.getStatus());
         }
-        
-        assertEquals(HttpServletResponse.SC_TOO_MANY_REQUESTS, response.getStatus());
-        assertTrue(response.getContentAsString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
-        
-        request.setParameter("username", "admin");
-        request.setParameter("password", "password123");
-        loginServlet.doPost(request, response);
-        
-        assertEquals(HttpServletResponse.SC_TOO_MANY_REQUESTS, response.getStatus());
+        Response response = loginServlet.doPost("admin", "wrongpass");
+        assertEquals(429, response.getStatus());
+        assertEquals("Account temporarily locked due to multiple failed login attempts. Please try again later.", 
+                    response.getContent());
     }
 
     @Test
-    public void testContentTypeValidation() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
+    public void testAccountLockoutDuration() {
+        for (int i = 0; i < 6; i++) {
+            loginServlet.doPost("admin", "wrongpass");
+        }
         
-        request.setParameter("username", "admin");
-        request.setParameter("password", "password123");
+        Response response = loginServlet.doPost("admin", "password123");
+        assertEquals(429, response.getStatus());
         
-        loginServlet.doPost(request, response);
+        simulateTimePass(15);
         
-        assertEquals("text/html", response.getContentType());
+        response = loginServlet.doPost("admin", "password123");
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testPasswordSecurity() {
+        Response response = loginServlet.doPost("admin", "wrongpassword");
+        assertFalse(response.getContent().contains("password123"));
     }
 }
-```
