@@ -1,3 +1,6 @@
+Here's the JUnit test code for the LoginServlet:
+
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -13,16 +16,16 @@ import static org.junit.Assert.*;
 public class LoginServletTest {
 
     @Mock
-    HttpServletRequest request;
+    private HttpServletRequest request;
 
     @Mock
-    HttpServletResponse response;
+    private HttpServletResponse response;
 
     @Mock
-    HttpSession session;
+    private HttpSession session;
 
     @Mock
-    PrintWriter writer;
+    private PrintWriter writer;
 
     private LoginServlet loginServlet;
 
@@ -84,7 +87,8 @@ public class LoginServletTest {
         for (int i = 0; i < 5; i++) {
             loginServlet.doPost(request, response);
         }
-        verify(response, times(1)).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+        verify(response, times(1)).setStatus(429);
         assertTrue(stringWriter.toString().contains("Account temporarily locked"));
     }
 }
+```
