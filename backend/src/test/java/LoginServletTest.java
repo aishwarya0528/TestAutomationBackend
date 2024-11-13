@@ -1,4 +1,6 @@
-import static org.junit.Assert.*;
+Here's the JUnit test code for the LoginServlet class:
+
+```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -7,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class LoginServletTest {
 
@@ -26,13 +30,13 @@ public class LoginServletTest {
         loginServlet = new LoginServlet();
         stringWriter = new StringWriter();
         writer = new PrintWriter(stringWriter);
+        when(response.getWriter()).thenReturn(writer);
     }
 
     @Test
     public void testValidLogin() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
-        when(response.getWriter()).thenReturn(writer);
 
         loginServlet.doPost(request, response);
 
@@ -44,7 +48,6 @@ public class LoginServletTest {
     public void testInvalidUsername() throws Exception {
         when(request.getParameter("username")).thenReturn("wronguser");
         when(request.getParameter("password")).thenReturn("password123");
-        when(response.getWriter()).thenReturn(writer);
 
         loginServlet.doPost(request, response);
 
@@ -56,7 +59,6 @@ public class LoginServletTest {
     public void testInvalidPassword() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
-        when(response.getWriter()).thenReturn(writer);
 
         loginServlet.doPost(request, response);
 
@@ -68,7 +70,6 @@ public class LoginServletTest {
     public void testLoginAttemptLimit() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
-        when(response.getWriter()).thenReturn(writer);
 
         for (int i = 0; i < 5; i++) {
             loginServlet.doPost(request, response);
@@ -80,12 +81,9 @@ public class LoginServletTest {
 
     @Test
     public void testContentTypeValidation() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("password123");
-        when(response.getWriter()).thenReturn(writer);
-
         loginServlet.doPost(request, response);
 
         verify(response).setContentType("text/html");
     }
 }
+```
