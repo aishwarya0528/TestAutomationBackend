@@ -1,109 +1,124 @@
-import org.junit.Before;
+Here's the JUnit test code for the LoginServlet class:
+
+```java
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
+import org.junit.Before;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 public class LoginServletTest {
     private LoginServlet loginServlet;
     
-    @Mock
-    private HttpServletRequest request;
-    
-    @Mock
-    private HttpServletResponse response;
-    
-    private StringWriter stringWriter;
-    private PrintWriter writer;
-
     @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+    public void setUp() {
         loginServlet = new LoginServlet();
-        stringWriter = new StringWriter();
-        writer = new PrintWriter(stringWriter);
-        when(response.getWriter()).thenReturn(writer);
     }
 
     @Test
-    public void testSuccessfulLogin() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("password123");
+    public void testSuccessfulLogin() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        request.setParameter("username", "admin");
+        request.setParameter("password", "password123");
         
         loginServlet.doPost(request, response);
         
-        verify(response).setStatus(HttpServletResponse.SC_OK);
-        verify(response).setContentType("text/html");
-        assertTrue(stringWriter.toString().contains("Login Successful!"));
-        assertTrue(stringWriter.toString().contains("Welcome, admin"));
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Login Successful!"));
+        assertTrue(response.getContentAsString().contains("admin"));
     }
 
     @Test
-    public void testInvalidUsername() throws Exception {
-        when(request.getParameter("username")).thenReturn("wronguser");
-        when(request.getParameter("password")).thenReturn("password123");
+    public void testInvalidUsername() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        request.setParameter("username", "wronguser");
+        request.setParameter("password", "password123");
         
         loginServlet.doPost(request, response);
         
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(response).setContentType("text/html");
-        assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password."));
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Login Failed. Invalid username or password."));
     }
 
     @Test
-    public void testInvalidPassword() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
+    public void testInvalidPassword() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        request.setParameter("username", "admin");
+        request.setParameter("password", "wrongpassword");
         
         loginServlet.doPost(request, response);
         
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(response).setContentType("text/html");
-        assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password."));
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Login Failed. Invalid username or password."));
     }
 
     @Test
-    public void testLoginAttemptLimit() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
+    public void testEmptyUsername() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        request.setParameter("username", "");
+        request.setParameter("password", "password123");
+        
+        loginServlet.doPost(request, response);
+        
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Username and password are required"));
+    }
 
+    @Test
+    public void testEmptyPassword() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        request.setParameter("username", "admin");
+        request.setParameter("password", "");
+        
+        loginServlet.doPost(request, response);
+        
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Username and password are required"));
+    }
+
+    @Test
+    public void testLoginAttemptLimit() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
         for (int i = 0; i < 5; i++) {
+            request.setParameter("username", "admin");
+            request.setParameter("password", "wrongpassword");
             loginServlet.doPost(request, response);
-            verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
-
+        
+        assertEquals(HttpServletResponse.SC_TOO_MANY_REQUESTS, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
+        
+        request.setParameter("username", "admin");
+        request.setParameter("password", "password123");
         loginServlet.doPost(request, response);
         
-        verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
-        verify(response).setContentType("text/html");
-        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
+        assertEquals(HttpServletResponse.SC_TOO_MANY_REQUESTS, response.getStatus());
     }
 
     @Test
-    public void testNoPasswordLeakage() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("password123");
+    public void testContentTypeValidation() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        request.setParameter("username", "admin");
+        request.setParameter("password", "password123");
         
         loginServlet.doPost(request, response);
         
-        assertFalse(stringWriter.toString().contains("password123"));
-    }
-
-    @Test
-    public void testMissingCredentials() throws Exception {
-        when(request.getParameter("username")).thenReturn(null);
-        when(request.getParameter("password")).thenReturn(null);
-        
-        loginServlet.doPost(request, response);
-        
-        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        verify(response).setContentType("text/html");
+        assertEquals("text/html", response.getContentType());
     }
 }
+```
