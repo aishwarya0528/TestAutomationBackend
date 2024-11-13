@@ -1,15 +1,15 @@
+Here are the JUnit test cases for the LoginServlet class:
 
-import static org.mockito.Mockito.*;
+```java
+import org.junit.Before;
+import org.junit.Test;
 import static org.junit.Assert.*;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import static org.mockito.Mockito.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
-import org.junit.Test;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class LoginServletTest {
     private LoginServlet loginServlet;
@@ -37,6 +37,7 @@ public class LoginServletTest {
         
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assertTrue(stringWriter.toString().contains("Login Successful!"));
+        assertTrue(stringWriter.toString().contains("Welcome, admin"));
     }
 
     @Test
@@ -64,20 +65,32 @@ public class LoginServletTest {
     @Test
     public void testContentTypeValidation() throws Exception {
         loginServlet.doPost(request, response);
-        
         verify(response).setContentType("text/html");
     }
 
     @Test
     public void testLoginAttemptLimit() throws Exception {
-        for (int i = 0; i < 6; i++) {
-            when(request.getParameter("username")).thenReturn("admin");
-            when(request.getParameter("password")).thenReturn("wrongpassword");
-            
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("wrongpassword");
+
+        for (int i = 0; i < 5; i++) {
             loginServlet.doPost(request, response);
         }
+
+        loginServlet.doPost(request, response);
         
         verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
-        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts"));
+        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
+    }
+
+    @Test
+    public void testNoPasswordLeakage() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("password123");
+        
+        loginServlet.doPost(request, response);
+        
+        assertFalse(stringWriter.toString().contains("password123"));
     }
 }
+```
