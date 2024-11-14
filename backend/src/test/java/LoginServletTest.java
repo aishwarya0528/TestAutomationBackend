@@ -1,6 +1,4 @@
-Here's the JUnit test code for the LoginServlet class:
 
-```java
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -87,4 +85,3 @@ class LoginServletTest {
         verify(response).setContentType("text/html");
     }
 }
-```
