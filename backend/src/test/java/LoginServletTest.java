@@ -1,10 +1,10 @@
-Here's the JUnit test code for the LoginServlet class based on the provided test cases:
+Here are the JUnit test cases based on the provided LoginServletTest class:
 
 ```java
-import org.junit.Before;
-import org.junit.Test;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
