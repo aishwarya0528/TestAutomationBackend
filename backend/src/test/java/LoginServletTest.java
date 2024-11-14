@@ -1,4 +1,4 @@
-Here's the JUnit test code for the LoginServlet class:
+Here's the JUnit test code for the LoginServlet class based on the provided template:
 
 ```java
 import org.junit.Before;
