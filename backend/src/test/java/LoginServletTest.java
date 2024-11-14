@@ -1,6 +1,4 @@
-Here are the JUnit test cases based on the provided JSON structure:
 
-```java
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -86,4 +84,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
     }
 }
-```
