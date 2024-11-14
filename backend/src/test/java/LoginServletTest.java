@@ -1,6 +1,4 @@
-Here's the JUnit test code for the LoginServlet class based on the provided template:
 
-```java
 import org.junit.Before;
 import org.junit.Test;
 import javax.servlet.http.HttpServletRequest;
@@ -118,4 +116,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Login Successful!"));
     }
 }
-```
