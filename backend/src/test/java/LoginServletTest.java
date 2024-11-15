@@ -1,6 +1,4 @@
-Here are the JUnit test cases for the LoginServlet class:
 
-```java
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import javax.servlet.ServletException;
@@ -88,4 +86,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
     }
 }
-```
