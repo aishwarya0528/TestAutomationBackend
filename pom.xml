@@ -11,11 +11,12 @@
 <dependencies>
 <!--  Servlet API for Java servlets  -->
 <dependency>
-<groupId>javax.servlet</groupId>
-<artifactId>javax.servlet-api</artifactId>
-<version>4.0.1</version>
-<scope>provided</scope>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>4.0.1</version>
+    <scope>compile</scope>
 </dependency>
+
 <!--  JUnit 4 Dependency  -->
 <dependency>
 <groupId>junit</groupId>
