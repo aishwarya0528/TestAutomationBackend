@@ -1,5 +1,7 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,6 +17,10 @@ public class LoginServlet extends HttpServlet {
     private final String USERNAME = "admin";
     private final String PASSWORD = "password123";
 
+    // Rate limiting settings
+    private static final int MAX_ATTEMPTS = 5;
+    private Map<String, Integer> loginAttempts = new HashMap<>();
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Get form data from the request
@@ -27,21 +33,23 @@ public class LoginServlet extends HttpServlet {
         // Get the writer to send the response
         PrintWriter out = response.getWriter();
 
-        // Validate credentials
+        
+         // Validate credentials
         if (USERNAME.equals(username) && PASSWORD.equals(password)) {
             // Success: set status to 200 (OK)
-            response.setStatus(HttpServletResponse.SC_OK);  // <--- Added this line
+            response.setStatus(HttpServletResponse.SC_OK);
             out.println("<html><body>");
             out.println("<h1>Login Successful!</h1>");
             out.println("<p>Welcome, " + username + "!</p>");
             out.println("</body></html>");
+            loginAttempts.remove(username); // Reset the attempts after a successful login
         } else {
-            // Failure: set status to 401 (Unauthorized)
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // <--- Added this line
+            // Failure: increment login attempts and set status to 401 (Unauthorized)
+            loginAttempts.put(username, attempts + 1);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             out.println("<html><body>");
             out.println("<h1>Login Failed</h1>");
             out.println("<p>Invalid username or password. Try again.</p>");
-            out.println("<a href=\"login.html\">Go Back to Login</a>");
             out.println("</body></html>");
         }
     }
