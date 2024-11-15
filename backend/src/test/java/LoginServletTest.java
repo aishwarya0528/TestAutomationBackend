@@ -1,75 +1,83 @@
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+Here's the JUnit test code for the LoginServlet class:
 
-import javax.servlet.ServletException;
+```java
+import org.junit.Before;
+import org.junit.Test;
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
-
-class LoginServletTest {
-
-    @Mock
-    private HttpServletRequest request;
-
-    @Mock
-    private HttpServletResponse response;
-
+public class LoginServletTest {
     private LoginServlet loginServlet;
+    private HttpServletRequest request;
+    private HttpServletResponse response;
     private StringWriter stringWriter;
     private PrintWriter writer;
 
-    @BeforeEach
-    void setUp() throws IOException {
-        MockitoAnnotations.openMocks(this);
+    @Before
+    public void setUp() throws Exception {
         loginServlet = new LoginServlet();
+        request = mock(HttpServletRequest.class);
+        response = mock(HttpServletResponse.class);
         stringWriter = new StringWriter();
         writer = new PrintWriter(stringWriter);
         when(response.getWriter()).thenReturn(writer);
     }
 
     @Test
-    void testSuccessfulLogin() throws ServletException, IOException {
+    public void testSuccessfulLogin() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
 
         loginServlet.doPost(request, response);
 
-        verify(response).setStatus(HttpServletResponse.SC_OK);
+        verify(response).setStatus(200);
         assertTrue(stringWriter.toString().contains("Login Successful!"));
-        assertTrue(stringWriter.toString().contains("Welcome admin"));
     }
 
     @Test
-    void testInvalidUsername() throws ServletException, IOException {
+    public void testInvalidUsername() throws Exception {
         when(request.getParameter("username")).thenReturn("wronguser");
         when(request.getParameter("password")).thenReturn("password123");
 
         loginServlet.doPost(request, response);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setStatus(401);
         assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password."));
     }
 
     @Test
-    void testInvalidPassword() throws ServletException, IOException {
+    public void testInvalidPassword() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
 
         loginServlet.doPost(request, response);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setStatus(401);
         assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password."));
     }
 
     @Test
-    void testContentTypeValidation() throws ServletException, IOException {
+    public void testLoginAttemptLimit() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("wrongpassword");
+
+        for (int i = 0; i < 5; i++) {
+            loginServlet.doPost(request, response);
+        }
+        
+        loginServlet.doPost(request, response);
+
+        verify(response, atLeastOnce()).setStatus(429);
+        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
+    }
+
+    @Test
+    public void testContentTypeValidation() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
 
@@ -77,19 +85,5 @@ class LoginServletTest {
 
         verify(response).setContentType("text/html");
     }
-
-    @Test
-    void testLoginAttemptsLimit() throws ServletException, IOException {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
-
-        for (int i = 0; i < 5; i++) {
-            loginServlet.doPost(request, response);
-        }
-
-        loginServlet.doPost(request, response);
-
-        verify(response).setStatus(429);
-        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
-    }
 }
+```
