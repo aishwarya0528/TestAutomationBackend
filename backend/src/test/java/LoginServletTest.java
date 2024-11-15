@@ -1,11 +1,10 @@
+Here are the JUnit test cases for the LoginServlet class:
 
+```java
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import javax.servlet.http.*;
 import org.junit.Before;
 import org.junit.Test;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
 
 public class LoginServletTest {
 
@@ -67,7 +66,7 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testTooManyFailedAttempts() {
+    public void testLoginAttemptsLockout() {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
         
@@ -81,3 +80,4 @@ public class LoginServletTest {
         verify(writer).println("Account temporarily locked due to multiple failed login attempts. Please try again later.");
     }
 }
+```
