@@ -1,4 +1,4 @@
-Here are the JUnit test cases for the LoginServlet class:
+Based on the provided LoginServlet.java file, here are the JUnit test cases:
 
 ```java
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,10 @@ class LoginServletTest {
         when(request.getParameter("password")).thenReturn("password123");
         loginServlet.doPost(request, response);
         verify(response).setStatus(HttpServletResponse.SC_OK);
-        assertTrue(stringWriter.toString().contains("Login Successful!"));
+        String responseContent = stringWriter.toString();
+        assertTrue(responseContent.contains("Login Successful!"));
+        assertTrue(responseContent.contains("Welcome admin"));
+        assertFalse(responseContent.contains("password123"));
     }
 
     @Test
@@ -45,6 +48,7 @@ class LoginServletTest {
         loginServlet.doPost(request, response);
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password"));
+        assertFalse(stringWriter.toString().contains("password123"));
     }
 
     @Test
@@ -54,6 +58,7 @@ class LoginServletTest {
         loginServlet.doPost(request, response);
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password"));
+        assertFalse(stringWriter.toString().contains("wrongpassword"));
     }
 
     @Test
