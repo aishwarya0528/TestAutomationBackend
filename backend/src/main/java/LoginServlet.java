@@ -37,19 +37,18 @@ public class LoginServlet extends HttpServlet {
          // Validate credentials
         if (USERNAME.equals(username) && PASSWORD.equals(password)) {
             // Success: set status to 200 (OK)
-            response.setStatus(HttpServletResponse.SC_OK);
+            response.setStatus(HttpServletResponse.SC_OK);  // <--- Added this line
             out.println("<html><body>");
             out.println("<h1>Login Successful!</h1>");
             out.println("<p>Welcome, " + username + "!</p>");
-            out.println("</body></html>");
-            loginAttempts.remove(username); // Reset the attempts after a successful login
+            out.println("</body></html>");// Reset the attempts after a successful login
         } else {
             // Failure: increment login attempts and set status to 401 (Unauthorized)
-            loginAttempts.put(username, attempts + 1);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+           response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // <--- Added this line
             out.println("<html><body>");
             out.println("<h1>Login Failed</h1>");
             out.println("<p>Invalid username or password. Try again.</p>");
+            out.println("<a href=\"login.html\">Go Back to Login</a>");
             out.println("</body></html>");
         }
     }
