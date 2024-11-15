@@ -1,6 +1,4 @@
-Here are the JUnit test cases based on the provided Java code:
 
-```java
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -83,4 +81,3 @@ public class LoginServletTest {
         verify(writer).println("Account temporarily locked due to multiple failed login attempts. Please try again later.");
     }
 }
-```
