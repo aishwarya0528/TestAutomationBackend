@@ -1,6 +1,4 @@
-Here's the JUnit test code for the LoginServlet class:
 
-```java
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
@@ -82,4 +80,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
     }
 }
-```
