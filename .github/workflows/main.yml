@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'  # Use the Temurin distribution of OpenJDK
-          java-version: '8'        # Set the Java version to 8 (Java 1.8 is referred to as 8)
+          java-version: '17'       # Set the Java version (you can use a different version if needed)
 
       - name: Install Maven
         run: sudo apt-get install maven -y
