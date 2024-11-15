@@ -1,13 +1,17 @@
+Here's the JUnit test code for the LoginServlet class:
 
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
+```java
 import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class LoginServletTest {
     private LoginServlet loginServlet;
@@ -70,17 +74,16 @@ public class LoginServletTest {
     }
 
     @Test
-    public void testLoginAttemptLimit() throws Exception {
+    public void testLoginAttemptsLimit() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
         
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             loginServlet.doPost(request, response);
         }
-        
-        loginServlet.doPost(request, response);
         
         verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
         assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
     }
 }
+```
