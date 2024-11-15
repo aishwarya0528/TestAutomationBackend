@@ -18,6 +18,14 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- JUnit Vintage Engine for running JUnit 4 tests -->
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>5.8.2</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- JUnit 5 Dependency -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
