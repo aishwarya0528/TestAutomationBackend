@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'  # Use the Temurin distribution of OpenJDK
-          java-version: '1.8'      # Set the Java version to 1.8 to match the pom.xml
+          java-version: '8'        # Set the Java version to 8 (Java 1.8 is referred to as 8)
 
       - name: Install Maven
         run: sudo apt-get install maven -y
@@ -35,4 +35,3 @@ jobs:
       - name: Display Backend Test File
         run: |
           cat backend/src/test/java/LoginServletTest.java
-
