@@ -1,6 +1,4 @@
-Here's the JUnit test code for the LoginServlet class:
 
-```java
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import javax.servlet.ServletException;
@@ -76,4 +74,3 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 }
-```
