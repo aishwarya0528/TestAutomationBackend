@@ -1,4 +1,6 @@
+Here's the JUnit test code for the LoginServlet class:
 
+```java
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import javax.servlet.ServletException;
@@ -28,16 +30,16 @@ public class LoginServletTest {
     }
 
     @Test
-    void testSuccessfulLogin() throws ServletException, IOException {
+    void testSuccessfulLogin() throws IOException, ServletException {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
         loginServlet.doPost(request, response);
         verify(response).setStatus(HttpServletResponse.SC_OK);
-        assertTrue(stringWriter.toString().contains("Login successful"));
+        assertTrue(stringWriter.toString().contains("Login successful!"));
     }
 
     @Test
-    void testInvalidUsername() throws ServletException, IOException {
+    void testInvalidUsername() throws IOException, ServletException {
         when(request.getParameter("username")).thenReturn("wronguser");
         when(request.getParameter("password")).thenReturn("password123");
         loginServlet.doPost(request, response);
@@ -46,7 +48,7 @@ public class LoginServletTest {
     }
 
     @Test
-    void testInvalidPassword() throws ServletException, IOException {
+    void testInvalidPassword() throws IOException, ServletException {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
         loginServlet.doPost(request, response);
@@ -55,7 +57,7 @@ public class LoginServletTest {
     }
 
     @Test
-    void testContentTypeValidation() throws ServletException, IOException {
+    void testContentTypeValidation() throws IOException, ServletException {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("password123");
         loginServlet.doPost(request, response);
@@ -63,7 +65,7 @@ public class LoginServletTest {
     }
 
     @Test
-    void testMultipleFailedAttempts() throws ServletException, IOException {
+    void testMultipleFailedAttempts() throws IOException, ServletException {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
         for (int i = 0; i < 5; i++) {
@@ -73,3 +75,4 @@ public class LoginServletTest {
         assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 }
+```
