@@ -1,4 +1,6 @@
+Here's the JUnit test code for the LoginServlet class:
 
+```java
 import org.junit.Before;
 import org.junit.Test;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +36,7 @@ public class LoginServletTest {
         
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(response).setContentType("text/html");
-        assertTrue(stringWriter.toString().contains("Login successful!"));
+        assertTrue(stringWriter.toString().contains("Login Successful!"));
     }
 
     @Test
@@ -46,7 +48,7 @@ public class LoginServletTest {
         
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verify(response).setContentType("text/html");
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password"));
     }
 
     @Test
@@ -58,20 +60,21 @@ public class LoginServletTest {
         
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verify(response).setContentType("text/html");
-        assertTrue(stringWriter.toString().contains("Login Failed"));
+        assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password"));
     }
 
     @Test
-    public void testMultipleFailedAttempts() throws Exception {
+    public void testLoginAttemptLimit() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
         
         for (int i = 0; i < 5; i++) {
             loginServlet.doPost(request, response);
-            verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            assertTrue(stringWriter.toString().contains("Login Failed"));
-            stringWriter.getBuffer().setLength(0);
         }
+        
+        verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+        verify(response).setContentType("text/html");
+        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later"));
     }
 
     @Test
@@ -84,3 +87,4 @@ public class LoginServletTest {
         verify(response).setContentType("text/html");
     }
 }
+```
