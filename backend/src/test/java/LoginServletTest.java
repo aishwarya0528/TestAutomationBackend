@@ -1,6 +1,3 @@
-Here's the JUnit test code for the LoginServlet class:
-
-```java
 import org.junit.Before;
 import org.junit.Test;
 import javax.servlet.http.HttpServletRequest;
@@ -87,4 +84,3 @@ public class LoginServletTest {
         verify(response).setContentType("text/html");
     }
 }
-```
