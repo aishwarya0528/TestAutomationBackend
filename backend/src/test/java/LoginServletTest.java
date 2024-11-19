@@ -1,6 +1,4 @@
-Here are the JUnit test cases for the LoginServlet class:
 
-```java
 import static org.mockito.Mockito.*;
 import javax.servlet.http.*;
 import org.junit.Before;
@@ -77,4 +75,3 @@ public class LoginServletTest {
         verify(writer).println("Login Failed");
     }
 }
-```
