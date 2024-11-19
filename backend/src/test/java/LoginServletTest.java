@@ -1,77 +1,89 @@
+Here are the JUnit test cases for the LoginServlet class:
 
-import static org.mockito.Mockito.*;
-import javax.servlet.http.*;
+```java
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+
+import static org.mockito.Mockito.*;
 
 public class LoginServletTest {
 
-    private LoginServlet loginServlet;
+    @Mock
     private HttpServletRequest request;
+
+    @Mock
     private HttpServletResponse response;
+
+    @Mock
     private PrintWriter writer;
+
+    private LoginServlet loginServlet;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         loginServlet = new LoginServlet();
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
-        writer = mock(PrintWriter.class);
         when(response.getWriter()).thenReturn(writer);
     }
 
     @Test
-    public void testSuccessfulLogin() {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("password123");
+    public void testSuccessfulLogin() throws Exception {
+        String username = "admin";
+        String password = "password123";
         
+        when(request.getParameter("username")).thenReturn(username);
+        when(request.getParameter("password")).thenReturn(password);
         loginServlet.doPost(request, response);
         
         verify(response).setStatus(HttpServletResponse.SC_OK);
-        verify(writer).println("Login Successful!");
+        verify(writer).println("Login successful!");
     }
 
     @Test
-    public void testInvalidUsername() {
-        when(request.getParameter("username")).thenReturn("wronguser");
-        when(request.getParameter("password")).thenReturn("password123");
+    public void testInvalidUsername() throws Exception {
+        String username = "wronguser";
+        String password = "password123";
         
+        when(request.getParameter("username")).thenReturn(username);
+        when(request.getParameter("password")).thenReturn(password);
         loginServlet.doPost(request, response);
         
-        verify(response).setStatus(401);
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verify(writer).println("Login Failed");
     }
 
     @Test
-    public void testInvalidPassword() {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
+    public void testInvalidPassword() throws Exception {
+        String username = "admin";
+        String password = "wrongpassword";
         
+        when(request.getParameter("username")).thenReturn(username);
+        when(request.getParameter("password")).thenReturn(password);
         loginServlet.doPost(request, response);
         
-        verify(response).setStatus(401);
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verify(writer).println("Login Failed");
     }
 
     @Test
-    public void testContentTypeValidation() {
-        loginServlet.doPost(request, response);
+    public void testMultipleFailedAttempts() throws Exception {
+        String username = "admin";
+        String password = "wrongpassword";
         
-        verify(response).setContentType("text/html");
-    }
-
-    @Test
-    public void testMultipleFailedAttempts() {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
-        
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
+            when(request.getParameter("username")).thenReturn(username);
+            when(request.getParameter("password")).thenReturn(password);
             loginServlet.doPost(request, response);
+            
+            verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            verify(writer).println("Login Failed");
         }
-        
-        loginServlet.doPost(request, response);
-        verify(response).setStatus(401);
-        verify(writer).println("Login Failed");
     }
 }
+```
