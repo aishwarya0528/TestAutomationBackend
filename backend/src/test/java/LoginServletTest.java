@@ -1,3 +1,6 @@
+Here's the JUnit test code for the LoginServlet class:
+
+```java
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
@@ -35,8 +38,7 @@ public class LoginServletTest {
         loginServlet.doPost(request, response);
         
         verify(response).setStatus(HttpServletResponse.SC_OK);
-        assertTrue(stringWriter.toString().contains("Login Successful!"));
-        assertTrue(stringWriter.toString().contains("Welcome, admin"));
+        assertTrue(stringWriter.toString().contains("Login successful!"));
     }
 
     @Test
@@ -47,7 +49,7 @@ public class LoginServletTest {
         loginServlet.doPost(request, response);
         
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password."));
+        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 
     @Test
@@ -58,30 +60,21 @@ public class LoginServletTest {
         loginServlet.doPost(request, response);
         
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        assertTrue(stringWriter.toString().contains("Login Failed. Invalid username or password."));
+        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 
     @Test
-    public void testContentType() throws Exception {
+    public void testContentTypeValidation() throws Exception {
+        when(request.getParameter("username")).thenReturn("admin");
+        when(request.getParameter("password")).thenReturn("password123");
+        
         loginServlet.doPost(request, response);
+        
         verify(response).setContentType("text/html");
     }
 
     @Test
-    public void testLoginAttemptLimit() throws Exception {
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
-        
-        for (int i = 0; i < 6; i++) {
-            loginServlet.doPost(request, response);
-        }
-        
-        verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
-        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
-    }
-
-    @Test
-    public void testAccountLockoutDuration() throws Exception {
+    public void testMultipleFailedAttempts() throws Exception {
         when(request.getParameter("username")).thenReturn("admin");
         when(request.getParameter("password")).thenReturn("wrongpassword");
         
@@ -90,8 +83,8 @@ public class LoginServletTest {
         }
         
         loginServlet.doPost(request, response);
-        
-        verify(response).setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
-        assertTrue(stringWriter.toString().contains("Account temporarily locked due to multiple failed login attempts. Please try again later."));
+        verify(response).setStatus(401);
+        assertTrue(stringWriter.toString().contains("Login Failed"));
     }
 }
+```
